@@ -1,0 +1,138 @@
+{
+  "version": 8,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base",
+      "binaryDir": "${sourceDir}/build",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_STANDARD": "17",
+        "CMAKE_CXX_STANDARD_REQUIRED": true
+      }
+    },
+    {
+      "inherits": "base",
+      "name": "msvc-debug",
+      "displayName": "Build use VS2019(Debug)",
+      "generator": "Visual Studio 16 2019",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "inherits": "base",
+      "name": "clang-debug",
+      "displayName": "Build use LLVM toolchain(Debug)",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "clang++"
+      }
+    },
+    {
+      "inherits": "msvc-debug",
+      "name": "msvc",
+      "displayName": "Build use VS2019(Release)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "inherits": "clang-debug",
+      "name": "clang",
+      "displayName": "Build use LLVM toolchain(Release)",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "msvc-debug",
+      "configurePreset": "msvc-debug",
+      "jobs": 8
+    },
+    {
+      "name": "clang-debug",
+      "configurePreset": "clang-debug",
+      "jobs": 8
+    },
+    {
+      "name": "msvc",
+      "configurePreset": "msvc",
+      "jobs": 8
+    },
+    {
+      "name": "clang",
+      "configurePreset": "clang",
+      "jobs": 8
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "window-debug",
+      "description": "Build Monopoly game with MSVC toolchain(Debug)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "msvc-debug"
+        },
+        {
+          "type": "build",
+          "name": "msvc-debug"
+        }
+      ]
+    },
+    {
+      "name": "window-release",
+      "description": "Build Monopoly game with MSVC toolchain(Release)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "msvc"
+        },
+        {
+          "type": "build",
+          "name": "msvc"
+        }
+      ]
+    },
+    {
+      "name": "clang-debug",
+      "description": "Build Monopoly game with MSVC toolchain(Debug)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "clang-debug"
+        },
+        {
+          "type": "build",
+          "name": "clang-debug"
+        }
+      ]
+    },
+
+    {
+      "name": "clang-release",
+      "description": "Build Monopoly game with MSVC toolchain(Release)",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "clang"
+        },
+        {
+          "type": "build",
+          "name": "clang"
+        }
+      ]
+    }
+  ]
+}
