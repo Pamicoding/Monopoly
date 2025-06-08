@@ -4,12 +4,13 @@
 #include "Error.hpp"
 #include "GameConfig.hpp"
 #include "Tiles/Tile.hpp"
+#include "Tiles/PropertyTile.hpp"
 #include <algorithm>
 #include <map>
 #include <memory>
 #include <vector>
 
-class PropertyTile;
+//class PropertyTile;
 class Board {
 private:
     static Board* instance;

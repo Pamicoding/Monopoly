@@ -4,9 +4,11 @@
 #include "Board.hpp"
 #include "Error.hpp"
 #include "GameConfig.hpp"
+#include "SudoCommand.hpp"
 #include "Player.hpp"
 #include "Tiles/Tile.hpp"
 #include "nlohmann/json.hpp"
+#include "Cards/CardFactory.hpp"
 #include <memory>
 #include <random>
 #include <vector>
@@ -23,6 +25,8 @@ private:
     nlohmann::json dialogueData;
     nlohmann::json commandData;
     bool gameForceControl;
+    std::vector<std::shared_ptr<Player>> playersList;
+    int currentTurnIndex = 0;
 
     std::vector<std::shared_ptr<Player>> players;
     static std::default_random_engine engine;
@@ -39,13 +43,17 @@ private:
 
 public:
     static std::shared_ptr<Game> getInstance(const GameConfig& config);
-
+    static std::shared_ptr<Game> getInstance();
+    const std::vector<std::shared_ptr<Player>>& getPlayers() const;
+    const std::shared_ptr<Player> Game::getCurrentPlayer() const;
+    void nextTurn();
+    void executeSudoCommand(const ParsedCommand& cmd);
     void initGame();
     void start();
     void checkGameOver();
     void endGame();
     void changeState(State newState);
-    void setState(const std::string& state);
+    void setState(State state);//(const std::string& state);
     std::string getStateString();
     bool isActivateState() const;
     bool isRoundState() const;

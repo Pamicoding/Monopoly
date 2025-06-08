@@ -1,0 +1,77 @@
+# Ignore build artifacts (compiled files, temporary files)
+bin/
+build/
+dist/
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.a
+*.lib
+*.exe
+*.out
+*.app
+
+# Ignore intermediate compiler files
+*.d
+*.gcda
+*.gcno
+*.gcov
+*.lastbuildstate
+
+# Ignore Visual Studio build folders
+x64/
+x86/
+Debug/
+Release/
+
+# Ignore Visual Studio generated files
+*.ilk
+*.pdb
+*.idb
+*.exp
+*.ipch
+*.aps
+*.ncb
+*.sdf
+*.suo
+*.cache
+*.pch
+*.tlog
+*.user
+*.VC.db
+.vs/
+
+# Ignore IDE settings and metadata
+.vscode/*
+!.vscode/extensions.json
+.qodo/
+.idea/
+*.code-workspace
+*.sln
+*.vcxproj*
+*.cbp
+
+# Ignore generated logs and temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+tmp*
+
+# Ignore testing output and code coverage data
+/tests/output/
+/tests/results/
+*.gcov
+*.lcov
+test.*
+
+# Ignore CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Ignore OS-specific files
+.DS_Store

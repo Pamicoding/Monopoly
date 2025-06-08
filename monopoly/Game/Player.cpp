@@ -5,6 +5,7 @@
 #include "MiniGames/MiniGameManager.hpp"
 #include <iomanip>
 #include <iostream>
+#include <random>
 Player::Player(const std::string& n, const std::string& i, const std::string& c, long long m)
     : name(n)
     , icon(i)
@@ -74,7 +75,9 @@ void Player::setMyTurn(bool b) {
  * @return Returns true if the addition is successful; returns false if the amount is negative
  */
 bool Player::addMoney(long long amount) {
-    throw NotImplement("`Player::addMoney` not implement");
+    if (bankrupt) return false;
+    money += amount;
+    return true;
 }
 
 /**
@@ -86,31 +89,54 @@ bool Player::addMoney(long long amount) {
  *         returns false if the player's balance is insufficient or if the amount is negative
  */
 bool Player::deductMoney(long long amount) {
-    throw NotImplement("`Player::deductMoney` not implement");
+    if (bankrupt) return false;
+    money -= amount;
+    if (money < 0){
+        bankrupt = true;
+        money = 0;
+        std::cout << "[PLAYER] " << name << " is bankrupt!\n";
+    }
+    return true;
 }
 
 void Player::setBankrupt(bool b) {
-    throw NotImplement("`Player::setBankrupt` not implement");
+    bankrupt = b;
+    if (b) money = 0;
 }
 
 void Player::sendToStart() {
-    throw NotImplement("`Player::sendToStart` not implement");
+    position = 0;
+    std::cout << "[PLAYER] send to start" << std::endl;
 }
 
 void Player::sendToHospital(int rounds) {
-    throw NotImplement("`Player::sendToHospital` not implement");
+    inHospital = true;
+    hospitalRoundLeft = rounds;
+    std::cout << "[PLAYER-HOSPITAL] " << name << " is sent to hospital for " << rounds << " rounds." << std::endl;
 }
 
 void Player::recoverFromHospital() {
-    throw NotImplement("`Player::recoverFromHospital` not implement");
+    inHospital = false;
+    hospitalRoundLeft = 0;
+    std::cout << "[PLAYER-HOSPITAL] " << name << " has recovered and left the hospital." << std::endl;
 }
 
 void Player::updateHospitalStatus() {
-    throw NotImplement("`Player::updateHospitalStatus` not implement");
+    if (!inHospital) return;
+
+    if (hospitalRoundLeft > 0){
+        hospitalRoundLeft--;
+        std::cout << "[PLAYER-HOSPITAL] " << name << " has " << hospitalRoundLeft << " rounds left in hospital." << std::endl;
+    }
+
+    if (hospitalRoundLeft <= 0){
+        recoverFromHospital();
+    }
 }
 
 void Player::addCard(std::shared_ptr<Card> card) {
-    throw NotImplement("`Player::addCard` not implement");
+    if (!card) return;
+    cards.push_back(card);
 }
 
 void Player::startMiniGame() {
@@ -120,26 +146,64 @@ void Player::endMiniGame() {
     MiniGameManager::endMiniGame(shared_from_this());
 }
 
+std::map<std::string, int> Player::getCardCounts() const {
+    std::map<std::string, int> cardCountMap;
+    for (const auto& card : cards) {
+        if (card) {
+            cardCountMap[card->getName()]++;
+        }
+    }
+    return cardCountMap;
+}
+
 std::vector<std::shared_ptr<Card>> Player::getCards() {
-    throw NotImplement("`Player::getCards` not implement");
+    return cards;
 }
 
 void Player::displayCards(std::vector<std::shared_ptr<Player>>& players) {
-    throw NotImplement("`Player::displayCards` not implement");
+    for (size_t i = 0; i < cards.size(); i++){
+        if (cards[i]){
+            std::cout << i << ". " << cards[i]->getName() << " - " << cards[i]->getEffect() << "\n";
+        }
+    };
 }
 
 void Player::useCard(int index, std::vector<std::shared_ptr<Player>>& players) {
-    throw NotImplement("`Player::useCard` not implement");
+    if (index < 0 || index >= static_cast<int>(cards.size())){
+        std::cout << "[PLAYER-CARD] Invalid card index\n";
+        return;
+    };
+
+    auto card = cards[index];
+    if (!card) return;
+
+    card->useEffect(players, shared_from_this());
+    cards.erase(cards.begin()+index);
+
+    std::cout << "[PLAYER-CARD] Card used: " << card->getName() << std::endl;
 }
 
 void Player::setDiceControl(int step) {
-    throw NotImplement("`Player::setDiceControl` not implement");
+    diceControl = step;
 }
 
 int Player::getDiceControl() const {
-    throw NotImplement("`Player::getDiceControl` not implement");
+    return diceControl;
 }
 
 int Player::rollDice() {
-    throw NotImplement("`Player::rollDice` not implement");
+    if (diceControl != -1){
+        int result = diceControl;
+        diceControl = -1;
+        std::cout << "[PLAYER-DICE] Controlled dice result: " << result << std::endl;
+        return result;
+    }
+
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    static std::uniform_int_distribution<> dist(1, 6);
+
+    int result = dist(gen);
+    std::cout << "[PLAYER-DICE] Random roll: " << result << std::endl;
+    return result;
 }

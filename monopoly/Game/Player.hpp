@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 
 class Card;
 class MiniGameManager;
@@ -57,7 +58,8 @@ public:
     // MiniGame related
     void startMiniGame();
     void endMiniGame();
-
+    
+    std::map<std::string, int> getCardCounts() const; // this is for Game's INFO command
     std::vector<std::shared_ptr<Card>> getCards();
     void displayCards(std::vector<std::shared_ptr<Player>>& players);
     void useCard(int index, std::vector<std::shared_ptr<Player>>& players);

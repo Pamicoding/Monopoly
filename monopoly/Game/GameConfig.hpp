@@ -26,7 +26,7 @@ struct CardConfig {
 class GameConfig {
 private:
     static GameConfig instance;
-    GameMode mode = GameMode::DEBUG;
+    GameMode mode = GameMode::DEBUG; // modify to RELEASE after.
     int playersNum = 2;
     int startMoney = 0;
     int winMoney = 0;

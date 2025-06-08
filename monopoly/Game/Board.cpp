@@ -15,35 +15,54 @@ Board* Board::instance = nullptr;
 std::string resetColor = "\033[0m";
 
 Board::Board(const GameConfig& config) {
-    throw NotImplement("`Board::Board` not implement");
+    mapSize = config.getMapSize();
+    tileWidth = config.getTileWidth();
+    animation = config.getAnimation();
+    animationTime = static_cast<int>(config.getAnimationTime());
+    propertyLevelIcons = config.getPropertyLevelIcons();
+
+    // setting tiles for board
+    auto tileconfigs = config.getBoardTiles();
+    for (const auto& tileconfig: tileconfigs){
+        tiles.push_back(std::make_shared<Tile>(tileconfig.id, tileconfig.name));
+    }
 }
 
 void Board::init(const GameConfig& config, const std::vector<std::shared_ptr<Player>>& players) {
-    throw NotImplement("`Board::init` not implement");
+    playersList = players;
+    updatePlayerPositions(players);
+    updateProperty(players);    
 }
 
 Board* Board::getInstance(const GameConfig& config) {
-    throw NotImplement("`Board::getInstance` not implement");
+    if (!instance){
+        instance = new Board(config);
+    }
+    return instance;
 }
 
 Board* Board::getInstance() {
-    throw NotImplement("`Board::getInstance` not implement");
+    return instance;
 }
 
 void Board::destroyInstance() {
-    throw NotImplement("`Board::destroyInstance` not implement");
+    if (instance){
+        delete instance;
+        instance = nullptr;
+    }
 }
 
 int Board::getSize() const {
-    throw NotImplement("`Board::getSize` not implement");
+    return static_cast<int>(tiles.size());
 }
 
 std::shared_ptr<Tile> Board::getTile(int index) {
-    throw NotImplement("`Board::getTile` not implement");
+    if (index < 0 || index>= static_cast<int>(tiles.size())) return nullptr;
+    return tiles[index];
 }
 
 std::vector<std::shared_ptr<Tile>> Board::getTileList() {
-    throw NotImplement("`Board::getTileList` not implement");
+    return tiles;
 }
 
 void Board::drawBoard() {
@@ -55,15 +74,38 @@ void Board::drawMonopolyAscii() {
 }
 
 void Board::updatePlayerPositions(const std::vector<std::shared_ptr<Player>>& players) {
-    throw NotImplement("`Board::updatePlayerPositions` not implement");
+    playersPosition.clear();
+    for (const auto& player: players){
+        playersPosition[player] = player->getPosition();
+    }
 }
 
 std::vector<std::shared_ptr<PropertyTile>> Board::getPlayerProperty(const std::shared_ptr<Player>& player) {
-    throw NotImplement("`Board::getPlayerProperty` not implement");
+    std::vector<std::shared_ptr<PropertyTile>> result;
+    for (const auto& tile: tiles){
+        auto prop = std::dynamic_pointer_cast<PropertyTile>(tile);
+        if (prop && prop->getOwner() == player){
+            result.push_back(prop);
+        }
+    }
+    return result;
 }
 
 void Board::updateProperty(const std::vector<std::shared_ptr<Player>>& players) {
-    throw NotImplement("`Board::updateProperty` not implement");
+    propertyLevelBoard.clear();
+    propertyLevelBoard.resize(mapSize, std::vector<int>(players.size(), 0));
+
+    for (size_t i = 0; i < players.size(); i++){
+        auto propertyTile = std::dynamic_pointer_cast<PropertyTile>(tiles[i]);
+        if (propertyTile && propertyTile->getOwner()){
+            auto owner = propertyTile->getOwner();
+            auto it = std::find(players.begin(), players.end(), owner);
+            if (it != players.end()){
+                size_t playerIndex = std::distance(players.begin(), it);
+                propertyLevelBoard[i][playerIndex] = propertyTile->getLevel();
+            }
+        }
+    }
 }
 
 void Board::clearScreen() {

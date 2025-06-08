@@ -14,125 +14,182 @@ GameConfig& GameConfig::getInstance() {
 }
 
 void GameConfig::loadConfig() {
-    throw NotImplement("`GameConfig::loadConfig` not implement");
+    std::ifstream file("resources/config.json");
+    if (!file) {
+        throw std::runtime_error("Failed to open config.json");
+    }
+
+    nlohmann::json j;
+    file >> j;
+
+    // Load game mode settings (assume always DEBUG first)
+    const auto& debug = j["modes"]["DEBUG"];
+    setPlayersNum(debug.value("playersNum", 2));
+    setPlayersName(debug["playersName"].get<std::vector<std::string>>());
+    setStartMoney(debug.value("startMoney", 0));
+    setWinMoney(debug.value("winMoney", 0));
+    setPassingStartBonus(debug.value("passingStartBonus", 0));
+
+    // Load global icon & style config
+    playerIcons = j.value("playerIcons", std::vector<std::string>());
+    playerColors = j.value("playerColors", std::vector<std::string>());
+    propertyLevelIcons = j.value("propertyLevelIcons", std::vector<std::string>());
+    tileWidth = j.value("tileWidth", 14);
+    animation = j.value("animation", false);
+    animationTime = j.value("animationTime", 0LL);
+
+    // Load board tiles
+    std::vector<TileConfig> tiles;
+    for (const auto& tile : j["boardTiles"]) {
+        TileConfig t;
+        t.id = tile.value("index", 0);
+        t.name = tile.value("name", "");
+        t.type = tile.value("type", "");
+        t.cost = tile.value("price", 0);
+        t.rent = tile.value("toll", 0);
+        tiles.push_back(t);
+    }
+    setBoardTiles(tiles);
+
+    // Load cards
+    std::vector<CardConfig> cardList;
+    for (const auto& card : j["cards"]) {
+        CardConfig c;
+        c.name = card.value("name", "");
+        c.icon = card.value("icon", "");
+        c.price = card.value("price", 0);
+        c.effect = card.value("effect", "");
+        cardList.push_back(c);
+    }
+    setCards(cardList);
+
+    // Optional: event ranges
+    std::map<std::string, std::pair<int, int>> rangeMap;
+    for (auto& [key, val] : j["eventValueRange"].items()) {
+        int min = val[0];
+        int max = val[1];
+        rangeMap[key] = {min, max};
+    }
+    setEventValueRange(rangeMap);
+
 }
 
 void GameConfig::setMode(GameMode newMode) {
-    throw NotImplement("`GameConfig::setMode` not implement");
+    mode = newMode;
 }
 
 GameMode GameConfig::getMode() const {
-    throw NotImplement("`GameConfig::getMode` not implement");
+    return mode;
 }
 
 void GameConfig::setPlayersNum(int num) {
-    throw NotImplement("`GameConfig::setPlayersNum` not implement");
+    playersNum = num;
 }
 
 int GameConfig::getPlayersNum() const {
-    throw NotImplement("`GameConfig::getPlayersNum` not implement");
+    return playersNum;
 }
 
 void GameConfig::setPlayersName(const std::vector<std::string>& names) {
-    throw NotImplement("`GameConfig::setPlayersName` not implement");
+    playersName = names;
 }
 
 std::vector<std::string> GameConfig::getPlayerNames() const {
-    throw NotImplement("`GameConfig::getPlayerNames` not implement");
+    return playersName;
 }
 
 void GameConfig::setPlayerIcons(const std::vector<std::string>& icons) {
-    throw NotImplement("`GameConfig::setPlayerIcons` not implement");
+    playerIcons = icons;
 }
 
 std::vector<std::string> GameConfig::getPlayerIcons() const {
-    throw NotImplement("`GameConfig::getPlayerIcons` not implement");
+    return playerIcons;
 }
 
 void GameConfig::setPlayerColors(const std::vector<std::string>& icons) {
-    throw NotImplement("`GameConfig::setPlayerColors` not implement");
+    playerColors = icons;
 }
 
 std::vector<std::string> GameConfig::getPlayerColors() const {
-    throw NotImplement("`GameConfig::getPlayerColors` not implement");
+    return playerColors;
 }
 
 void GameConfig::setPropertyLevelIcons(const std::vector<std::string>& icons) {
-    throw NotImplement("`GameConfig::setPropertyLevelIcons` not implement");
+    propertyLevelIcons = icons;
 }
 
 std::vector<std::string> GameConfig::getPropertyLevelIcons() const {
-    throw NotImplement("`GameConfig::getPropertyLevelIcons` not implement");
+    return propertyLevelIcons;
 }
 
 std::map<int, std::string> GameConfig::getLocationMap() const {
-    throw NotImplement("`GameConfig::getLocationMap` not implement");
+    return locationMap;
 }
 
 void GameConfig::setStartMoney(int amount) {
-    throw NotImplement("`GameConfig::setStartMoney` not implement");
+    startMoney = amount; 
 }
 
 int GameConfig::getStartMoney() const {
-    throw NotImplement("`GameConfig::getStartMoney` not implement");
+    return startMoney;
 }
 
 void GameConfig::setWinMoney(int amount) {
-    throw NotImplement("`GameConfig::setWinMoney` not implement");
+    winMoney = amount;
 }
 
 int GameConfig::getWinMoney() const {
-    throw NotImplement("`GameConfig::getWinMoney` not implement");
+    return winMoney;
 }
 
 void GameConfig::setPassingStartBonus(int amount) {
-    throw NotImplement("`GameConfig::setPassingStartBonus` not implement");
+    passingStartBonus = amount;
 }
 
 int GameConfig::getPassingStartBonus() const {
-    throw NotImplement("`GameConfig::getPassingStartBonus` not implement");
+    return passingStartBonus;
 }
 
 void GameConfig::setBoardTiles(const std::vector<TileConfig>& tiles) {
-    throw NotImplement("`GameConfig::setBoardTiles` not implement");
+    boardTiles = tiles;
 }
 
 std::vector<TileConfig> GameConfig::getBoardTiles() const {
-    throw NotImplement("`GameConfig::getBoardTiles` not implement");
+    return boardTiles;
 }
 
 void GameConfig::setCards(const std::vector<CardConfig>& cards) {
-    throw NotImplement("`GameConfig::setCards` not implement");
+    this->cards = cards;
 }
 
 std::vector<CardConfig> GameConfig::getCards() const {
-    throw NotImplement("`GameConfig::getCards` not implement");
+    return cards;
 }
 
 void GameConfig::setEventValueRange(const std::map<std::string, std::pair<int, int>>& range) {
-    throw NotImplement("`GameConfig::setEventValueRange` not implement");
+    eventValueRange = range;
 }
 
 std::map<std::string, std::pair<int, int>> GameConfig::getEventValueRange() const {
-    throw NotImplement("`GameConfig::getEventValueRange` not implement");
+    return eventValueRange;
 }
 
 void GameConfig::setAnimation(bool status) {
-    throw NotImplement("`GameConfig::setAnimation` not implement");
+    animation = status;
 }
 
 bool GameConfig::getAnimation() const {
-    throw NotImplement("`GameConfig::getAnimation()` not implement");
+    return animation;
 }
 
 int GameConfig::getMapSize() const {
-    throw NotImplement("`GameConfig::getMapSize()` not implement");
+    return mapSize;
 }
 
 int GameConfig::getTileWidth() const {
-    throw NotImplement("`GameConfig::getTileWidth()` not implement");
+    return static_cast<int>(tileWidth);
 }
 
 long long GameConfig::getAnimationTime() const {
-    throw NotImplement("`GameConfig::getAnimationTime()` not implement");
+    return animationTime;
 }
