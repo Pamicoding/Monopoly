@@ -1,26 +1,33 @@
-﻿#include "Game/Game.hpp"
+#include "Game/Game.hpp"
 #include "Game/GameConfig.hpp"
 #include "SingletonManager.hpp"
-#include <exception>
-#include <iostream>
+#include "UI/MainWindow.hpp"
 
-using namespace std;
-int main() {
+#include <QApplication>
+#include <QDebug>
+#include <exception>
+
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+
     try {
         GameMode mode = GameMode::DUEL;
-        GameConfig::getInstance().setMode(mode);
-        ios::sync_with_stdio(false);
-        cin.tie(nullptr);
+        GameConfig &cfg = GameConfig::getInstance();
+        cfg.setMode(mode);
+        cfg.loadConfig();
 
-        // Game game(GameConfig::getInstance());
-        std::shared_ptr<Game> game = Game::getInstance(GameConfig::getInstance());
+        std::shared_ptr<Game> game = Game::getInstance(cfg);
         game->initGame();
-        game->start();
 
-        // End of the game
-        SingletonManager::destroyAll(); // Destroy all singleton instances
-    } catch (NotImplement& e) {
-        std::cout << e.what() << '\n';
+        MainWindow window;
+        window.refresh();
+        window.show();
+        int ret = app.exec();
+
+        SingletonManager::destroyAll();
+        return ret;
+    } catch (const std::exception &e) {
+        qWarning() << "Exception:" << e.what();
     }
     return 0;
 }
