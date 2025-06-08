@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 3.23)
 project(Monopoly)
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+
 include_directories(${CMAKE_SOURCE_DIR}/monopoly)
 include_directories(${CMAKE_SOURCE_DIR}/monopoly/include)
 include_directories(${CMAKE_SOURCE_DIR}/include)
@@ -21,6 +27,7 @@ file(GLOB GAME_MODULE ${CMAKE_SOURCE_DIR}/monopoly/Game/*.cpp ${CMAKE_SOURCE_DIR
 file(GLOB MINI_GAME_MODULE ${CMAKE_SOURCE_DIR}/monopoly/MiniGames/*.cpp ${CMAKE_SOURCE_DIR}/monopoly/MiniGames/*.hpp)
 file(GLOB TILE_MODULE ${CMAKE_SOURCE_DIR}/monopoly/Tiles/*.cpp ${CMAKE_SOURCE_DIR}/monopoly/Tiles/*.hpp)
 file(GLOB UTIL_MODULE ${CMAKE_SOURCE_DIR}/monopoly/Utils/*.cpp ${CMAKE_SOURCE_DIR}/monopoly/Utils/*.hpp)
+file(GLOB UI_MODULE ${CMAKE_SOURCE_DIR}/monopoly/UI/*.cpp ${CMAKE_SOURCE_DIR}/monopoly/UI/*.hpp)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -39,4 +46,7 @@ add_executable(monopoly
   ${MINI_GAME_MODULE}
   ${TILE_MODULE}
   ${UTIL_MODULE}
+  ${UI_MODULE}
 )
+
+target_link_libraries(monopoly PRIVATE Qt6::Widgets)
