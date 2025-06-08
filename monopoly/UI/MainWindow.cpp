@@ -2,11 +2,13 @@
 #include "CardDialog.hpp"
 #include "MiniGameDialog.hpp"
 #include "SudoDialog.hpp"
+#include "PromptDialog.hpp"
 #include "Game.hpp"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QLabel>
+#include <QMessageBox>
 
 void MainWindow::refresh() {
     auto players = Game::getInstance()->getPlayers();
@@ -43,6 +45,7 @@ void MainWindow::refresh() {
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     setupUI();
+    setupCallbacks();
 }
 
 void MainWindow::setupUI() {
@@ -97,5 +100,20 @@ void MainWindow::setupUI() {
             refresh();
         });
         sudo->exec();
+    });
+}
+
+void MainWindow::setupCallbacks() {
+    auto game = Game::getInstance();
+    game->setInfoCallback([this](const std::string& msg) {
+        QMessageBox::information(this, "Info", QString::fromStdString(msg));
+        refresh();
+    });
+    game->setPromptCallback([this](const std::string& prompt, const nlohmann::json& opts, std::function<void(const std::string&)> cb) {
+        PromptDialog dlg(this);
+        dlg.setPrompt(prompt, opts);
+        std::string res = dlg.execAndGetResult();
+        if (cb) cb(res);
+        refresh();
     });
 }

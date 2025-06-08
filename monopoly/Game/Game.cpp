@@ -15,6 +15,8 @@
 
 std::default_random_engine Game::engine;
 std::shared_ptr<Game> Game::instance = nullptr;
+Game::InfoCallback Game::infoCallback = nullptr;
+Game::PromptCallback Game::promptCallback = nullptr;
 
 Game::Game(const GameConfig& cfg)
     : config(cfg), currentState(State::INIT), gameForceControl(false) {
@@ -71,7 +73,7 @@ void Game::nextTurn() {
     playersList[currentTurnIndex]->setMyTurn(true);
     changeState(State::START);
 
-    std::cout << "🕐 Next turn: " << playersList[currentTurnIndex]->getName() << "\n";
+    log("\xF0\x9F\x95\x90 Next turn: " + playersList[currentTurnIndex]->getName());
 }
 
 void Game::executeSudoCommand(const ParsedCommand& cmd){
@@ -155,7 +157,7 @@ void Game::initGame() {
     Board::getInstance()->init(config, playersList);
 
     changeState(State::INIT);
-    std::cout << "[INIT] Game initialized with " << playersList.size() << " players.\n";
+    log("[INIT] Game initialized with " + std::to_string(playersList.size()) + " players.");
 }
 
 void Game::start() {
@@ -171,12 +173,12 @@ void Game::start() {
     }
 
     // Optional: log or show a start message
-    std::cout << "🎮 Game started. It's " << playersList[currentTurnIndex]->getName() << "'s turn.\n";
+    log("\xF0\x9F\x8E\xAE Game started. It's " + playersList[currentTurnIndex]->getName() + "'s turn.");
 }
 
 void Game::processPlayerAction(std::shared_ptr<Player> player, std::shared_ptr<Tile> tile, bool isCommandResult) {
     if (tile->isBlocked()) {
-        std::cout << "This tile is blocked by a barrier. Skipping turn...\n";
+        log("This tile is blocked by a barrier. Skipping turn...");
         nextTurn();
         return;
     }
@@ -216,48 +218,24 @@ void Game::processPlayerAction(std::shared_ptr<Player> player, std::shared_ptr<T
     }
 
     std::string prompt = optionsJson["prompt"];
-    std::cout << prompt << "\n";
-
     const auto& options = optionsJson["options"];
-    for (const auto& opt : options) {
-        std::cout << "[" << opt["key"] << "] " << opt["description"] << "\n";
-    }
 
-    std::string input;
-    while (true) {
-        std::cout << "> ";
-        std::getline(std::cin, input);
-
-        bool matched = false;
-        // TODO: 這邊要想一下，因為我們用UI的話，這邊應該不會有輸入
-        for (const auto& opt : options) {
-            if (opt["key"] == "*" || opt["key"] == input) {
-                matched = true;
-                if (input == "I") {
-                    //player->printInfo();
-                } else if (input == "R") {
-                    // Buy or upgrade
-                    // Placeholder: handle accordingly
-                } else if (input == "S") {
-                    // Sell
-                    // Placeholder: handle accordingly
-                } else if (input == "E") {
-                    // Enter store
-                    // Placeholder
-                } else if (input == "T") {
-                    // Roll dice (usually not here)
+    if (promptCallback) {
+        promptCallback(prompt, options, [this, options](const std::string& input) {
+            bool matched = false;
+            for (const auto& opt : options) {
+                if (opt["key"] == "*" || opt["key"] == input) {
+                    matched = true;
+                    if (opt["key"] == "*" || input != "I") {
+                        nextTurn();
+                    }
+                    break;
                 }
-                if (opt["key"] == "*" || input != "I") {
-                    nextTurn();
-                    return;
-                }
-                break;
             }
-        }
-
-        if (!matched) {
-            std::cout << dialogueData["invalid_input"]["prompt"] << "\n";
-        }
+            if (!matched) {
+                log(dialogueData["invalid_input"]["prompt"]);
+            }
+        });
     }
 }
 
@@ -290,35 +268,33 @@ void Game::checkGameOver() {
 
     if (aliveCount <= 1) {
         changeState(State::FINISH);
-        std::cout << "\n============================\n";
-        std::cout << "        GAME OVER!\n";
-        std::cout << "============================\n";
+        log("============================\n        GAME OVER!\n============================");
         if (lastAlive) {
-            std::cout << "Winner: " << lastAlive->getName() << " with $" << lastAlive->getMoney() << "\n";
+            log("Winner: " + lastAlive->getName() + " with $" + std::to_string(lastAlive->getMoney()));
         } else {
-            std::cout << "No winner (all players bankrupt).\n";
+            log("No winner (all players bankrupt).");
         }
         endGame();
     }
 }
 
 void Game::endGame() {
-    std::cout << "\nFinal Player Status:\n";
-    std::cout << "---------------------\n";
+    log("\nFinal Player Status:");
+    log("---------------------");
     for (const auto& player : playersList) {
-        std::cout << player->getName() << " - $" << player->getMoney();
+        std::string line = player->getName() + " - $" + std::to_string(player->getMoney());
         if (player->isBankrupt()) {
-            std::cout << " [BANKRUPT]";
+            line += " [BANKRUPT]";
         }
-        std::cout << "\n";
+        log(line);
     }
-    std::cout << "\nThank you for playing Monopoly!\n";
+    log("\nThank you for playing Monopoly!");
 }
 
 void Game::changeState(State newState) {
-    std::cout << "[STATE] Transition: " << getStateString() << " → ";
+    log("[STATE] Transition: " + getStateString() + " → ");
     setState(newState);
-    std::cout << getStateString() << "\n";
+    log(getStateString());
 }
 
 State& operator++(State& state) {
@@ -405,4 +381,20 @@ bool Game::isActivateState() const {
 
 bool Game::isRoundState() const {
     return currentState == State::ROUND_END;
+}
+
+void Game::setInfoCallback(InfoCallback cb) {
+    infoCallback = std::move(cb);
+}
+
+void Game::setPromptCallback(PromptCallback cb) {
+    promptCallback = std::move(cb);
+}
+
+void Game::log(const std::string& message) {
+    if (infoCallback) {
+        infoCallback(message);
+    } else {
+        std::cout << message << std::endl;
+    }
 }

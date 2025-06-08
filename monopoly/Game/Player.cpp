@@ -94,7 +94,7 @@ bool Player::deductMoney(long long amount) {
     if (money < 0){
         bankrupt = true;
         money = 0;
-        std::cout << "[PLAYER] " << name << " is bankrupt!\n";
+        Game::log("[PLAYER] " + name + " is bankrupt!");
     }
     return true;
 }
@@ -106,19 +106,19 @@ void Player::setBankrupt(bool b) {
 
 void Player::sendToStart() {
     position = 0;
-    std::cout << "[PLAYER] send to start" << std::endl;
+    Game::log("[PLAYER] send to start");
 }
 
 void Player::sendToHospital(int rounds) {
     inHospital = true;
     hospitalRoundLeft = rounds;
-    std::cout << "[PLAYER-HOSPITAL] " << name << " is sent to hospital for " << rounds << " rounds." << std::endl;
+    Game::log("[PLAYER-HOSPITAL] " + name + " is sent to hospital for " + std::to_string(rounds) + " rounds.");
 }
 
 void Player::recoverFromHospital() {
     inHospital = false;
     hospitalRoundLeft = 0;
-    std::cout << "[PLAYER-HOSPITAL] " << name << " has recovered and left the hospital." << std::endl;
+    Game::log("[PLAYER-HOSPITAL] " + name + " has recovered and left the hospital.");
 }
 
 void Player::updateHospitalStatus() {
@@ -126,7 +126,7 @@ void Player::updateHospitalStatus() {
 
     if (hospitalRoundLeft > 0){
         hospitalRoundLeft--;
-        std::cout << "[PLAYER-HOSPITAL] " << name << " has " << hospitalRoundLeft << " rounds left in hospital." << std::endl;
+        Game::log("[PLAYER-HOSPITAL] " + name + " has " + std::to_string(hospitalRoundLeft) + " rounds left in hospital.");
     }
 
     if (hospitalRoundLeft <= 0){
@@ -163,14 +163,14 @@ std::vector<std::shared_ptr<Card>> Player::getCards() {
 void Player::displayCards(std::vector<std::shared_ptr<Player>>& players) {
     for (size_t i = 0; i < cards.size(); i++){
         if (cards[i]){
-            std::cout << i << ". " << cards[i]->getName() << " - " << cards[i]->getEffect() << "\n";
+            Game::log(std::to_string(i) + ". " + cards[i]->getName() + " - " + cards[i]->getEffect());
         }
     };
 }
 
 void Player::useCard(int index, std::vector<std::shared_ptr<Player>>& players) {
     if (index < 0 || index >= static_cast<int>(cards.size())){
-        std::cout << "[PLAYER-CARD] Invalid card index\n";
+        Game::log("[PLAYER-CARD] Invalid card index");
         return;
     };
 
@@ -180,7 +180,7 @@ void Player::useCard(int index, std::vector<std::shared_ptr<Player>>& players) {
     card->useEffect(players, shared_from_this());
     cards.erase(cards.begin()+index);
 
-    std::cout << "[PLAYER-CARD] Card used: " << card->getName() << std::endl;
+    Game::log("[PLAYER-CARD] Card used: " + card->getName());
 }
 
 void Player::setDiceControl(int step) {
@@ -195,7 +195,7 @@ int Player::rollDice() {
     if (diceControl != -1){
         int result = diceControl;
         diceControl = -1;
-        std::cout << "[PLAYER-DICE] Controlled dice result: " << result << std::endl;
+        Game::log("[PLAYER-DICE] Controlled dice result: " + std::to_string(result));
         return result;
     }
 
@@ -204,6 +204,6 @@ int Player::rollDice() {
     static std::uniform_int_distribution<> dist(1, 6);
 
     int result = dist(gen);
-    std::cout << "[PLAYER-DICE] Random roll: " << result << std::endl;
+    Game::log("[PLAYER-DICE] Random roll: " + std::to_string(result));
     return result;
 }

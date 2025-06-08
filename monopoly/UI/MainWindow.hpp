@@ -20,6 +20,7 @@ private:
     PlayerPanel* playerPanel;
 
     void setupUI();
+    void setupCallbacks();
 };
 
 #endif // MAINWINDOW_HPP
