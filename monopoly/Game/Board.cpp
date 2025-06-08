@@ -109,9 +109,5 @@ void Board::updateProperty(const std::vector<std::shared_ptr<Player>>& players) 
 }
 
 void Board::clearScreen() {
-#ifdef _WIN32
-    system("cls");
-#else
-    std::cout << "\033[2J\033[H"; // ANSI Escape Code to clear the screen and move the cursor to the top-left corner
-#endif
+    // Deprecated: clearing the terminal is no longer needed when using a GUI
 }

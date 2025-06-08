@@ -12,6 +12,7 @@
 #include <memory>
 #include <random>
 #include <vector>
+#include <functional>
 
 enum class State { INIT, START, MOVED, ROUND_END, FINISH };
 State& operator++(State& state);
@@ -30,6 +31,12 @@ private:
 
     std::vector<std::shared_ptr<Player>> players;
     static std::default_random_engine engine;
+
+    using InfoCallback = std::function<void(const std::string&)>;
+    using PromptCallback = std::function<void(const std::string&, const nlohmann::json&, std::function<void(const std::string&)>)>;
+
+    static InfoCallback infoCallback;
+    static PromptCallback promptCallback;
 
     // isCommandResult = false (default). let it continue to retry input when isCommandResult = true
     void processPlayerAction(std::shared_ptr<Player> player, std::shared_ptr<Tile> tile, bool isCommandResult = false);
@@ -57,6 +64,10 @@ public:
     std::string getStateString();
     bool isActivateState() const;
     bool isRoundState() const;
+
+    static void log(const std::string& message);
+    void setInfoCallback(InfoCallback cb);
+    void setPromptCallback(PromptCallback cb);
 };
 
 #endif // GAME_HPP
