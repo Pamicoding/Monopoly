@@ -8,7 +8,7 @@
 #include <QVector>
 #include <QString>
 #include <QGraphicsOpacityEffect>
-#include "GameConfig.hpp"
+#include "Game/GameConfig.hpp"
 
 class CardDialog : public QDialog {
     Q_OBJECT

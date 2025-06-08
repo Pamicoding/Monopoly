@@ -1,3 +1,6 @@
+#ifndef SUDOCOMMAND_HPP
+#define SUDOCOMMAND_HPP
+
 #include <string>
 #include <vector>
 
@@ -22,3 +25,4 @@ struct CommandDefinition {
     std::vector<std::string> examples;
     std::string prompt;
 };
+#endif  
